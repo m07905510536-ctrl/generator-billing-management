@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مولدتي — نظام إدارة المولدات الأهلية</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #3b82f6;
+      --blue-dark: #1e40af;
+      --navy:      #0f172a;
+      --gray-bg:   #f8fafc;
+      --gray-card: #ffffff;
+      --gray-border:#e2e8f0;
+      --gray-text: #64748b;
+      --green:     #16a34a;
+      --amber:     #d97706;
+      --red:       #dc2626;
+      --radius:    12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Noto Sans Arabic', Arial, sans-serif;
+      background: var(--gray-bg);
+      color: var(--navy);
+      line-height: 1.7;
+    }
+
+    /* ── Hero ─────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1d4ed8 100%);
+      color: #fff;
+      padding: 72px 24px 60px;
+      text-align: center;
+    }
+    .hero-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 88px; height: 88px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 24px;
+      margin-bottom: 24px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .hero-logo svg { width: 48px; height: 48px; fill: #fff; }
+    .hero h1 { font-size: 3rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 12px; }
+    .hero p  { font-size: 1.2rem; color: rgba(255,255,255,0.78); max-width: 560px; margin: 0 auto 32px; }
+
+    .badge-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+    }
+    .badge-blue   { background: #2563eb; color: #fff; }
+    .badge-green  { background: #15803d; color: #fff; }
+    .badge-amber  { background: #b45309; color: #fff; }
+    .badge-slate  { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+
+    /* ── Container ────────────────────────────────────── */
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Section ──────────────────────────────────────── */
+    section { padding: 56px 0; border-bottom: 1px solid var(--gray-border); }
+    section:last-of-type { border-bottom: none; }
+
+    h2 {
+      font-size: 1.75rem; font-weight: 800; margin-bottom: 8px; color: var(--navy);
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2 .icon { font-size: 1.5rem; }
+    .section-sub { color: var(--gray-text); margin-bottom: 32px; font-size: 1rem; }
+
+    /* ── Cards grid ───────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+    .card {
+      background: var(--gray-card);
+      border: 1px solid var(--gray-border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .card p  { font-size: 0.9rem; color: var(--gray-text); }
+    .card .card-icon { font-size: 1.6rem; margin-bottom: 12px; }
+
+    /* ── Role table ───────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    thead th {
+      background: var(--navy); color: #fff;
+      padding: 12px 16px; text-align: right; font-weight: 700;
+    }
+    tbody tr:nth-child(even) { background: #f1f5f9; }
+    tbody td { padding: 12px 16px; border-bottom: 1px solid var(--gray-border); }
+    .check { color: var(--green); font-weight: 700; font-size: 1.1rem; }
+    .cross { color: #94a3b8; }
+
+    /* ── Status badges ────────────────────────────────── */
+    .status-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 20px; border-radius: 999px; font-weight: 700; font-size: 0.9rem;
+    }
+    .s-paid    { background: #dcfce7; color: #166534; }
+    .s-partial { background: #fef9c3; color: #854d0e; }
+    .s-unpaid  { background: #fee2e2; color: #991b1b; }
+    .s-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-green  { background: #16a34a; }
+    .dot-amber  { background: #d97706; }
+    .dot-red    { background: #dc2626; }
+
+    /* ── Tech stack ───────────────────────────────────── */
+    .tech-item {
+      background: #fff; border: 1px solid var(--gray-border);
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .tech-item .tech-label { font-weight: 700; font-size: 0.9rem; }
+    .tech-item .tech-value { color: var(--blue); font-size: 0.85rem; }
+
+    /* ── Code block ───────────────────────────────────── */
+    pre {
+      background: #0f172a; color: #e2e8f0;
+      border-radius: var(--radius); padding: 20px 24px;
+      font-size: 0.88rem; overflow-x: auto; direction: ltr; text-align: left;
+      font-family: 'Courier New', monospace; margin: 16px 0;
+      border: 1px solid #1e293b;
+    }
+    code { font-family: 'Courier New', monospace; }
+    .comment { color: #94a3b8; }
+    .keyword { color: #93c5fd; }
+    .string  { color: #86efac; }
+
+    /* ── Schema ───────────────────────────────────────── */
+    .schema-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 24px; }
+    .schema-table thead th {
+      background: #1e293b; color: #94a3b8;
+      padding: 8px 12px; text-align: right; font-weight: 600; font-size: 0.78rem; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .schema-table tbody td { padding: 8px 12px; border-bottom: 1px solid var(--gray-border); }
+    .schema-table tbody tr:nth-child(even) { background: #f8fafc; }
+    .col-type { color: #7c3aed; font-weight: 600; font-size: 0.8rem; }
+    .col-desc { color: var(--gray-text); font-size: 0.82rem; }
+    .schema-title { font-weight: 700; margin: 24px 0 8px; color: var(--navy); font-size: 1rem; }
+
+    /* ── API endpoint pills ───────────────────────────── */
+    .endpoint-list { display: flex; flex-direction: column; gap: 8px; }
+    .endpoint {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff; border: 1px solid var(--gray-border);
+      border-radius: 8px; padding: 10px 16px; font-size: 0.85rem;
+    }
+    .method {
+      font-weight: 800; font-size: 0.75rem; padding: 3px 10px;
+      border-radius: 4px; min-width: 52px; text-align: center; direction: ltr;
+    }
+    .GET    { background: #dbeafe; color: #1d4ed8; }
+    .POST   { background: #dcfce7; color: #15803d; }
+    .PUT    { background: #fef9c3; color: #854d0e; }
+    .DELETE { background: #fee2e2; color: #991b1b; }
+    .endpoint-path { font-family: monospace; color: var(--navy); direction: ltr; }
+    .endpoint-desc { color: var(--gray-text); margin-right: auto; }
+
+    /* ── Credentials box ──────────────────────────────── */
+    .cred-box {
+      background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius);
+      padding: 20px 24px; margin-bottom: 24px;
+    }
+    .cred-box h3 { color: #15803d; font-size: 1rem; margin-bottom: 12px; }
+    .cred-row { display: flex; gap: 24px; flex-wrap: wrap; }
+    .cred-item { font-size: 0.9rem; }
+    .cred-item .key { color: var(--gray-text); margin-left: 6px; }
+    .cred-item .val { font-weight: 700; font-family: monospace; color: var(--navy); }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      background: var(--navy); color: rgba(255,255,255,0.6);
+      text-align: center; padding: 32px 24px;
+      font-size: 0.85rem;
+    }
+    footer strong { color: #fff; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2rem; }
+      h2 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════ HERO ════════════════════════════ -->
+<div class="hero">
+  <div class="hero-logo">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 2L4.09 12.96A1 1 0 0 0 5 14.5h6.5L11 22l8.91-10.96A1 1 0 0 0 19 9.5h-6.5L13 2z"/>
+    </svg>
+  </div>
+  <h1>مولدتي ⚡</h1>
+  <p>نظام إدارة شامل ودائم للمولدات الأهلية في الأحياء العراقية — PWA عربي متكامل مع دعم العمل بدون إنترنت</p>
+  <div class="badge-row">
+    <span class="badge badge-blue">React 19</span>
+    <span class="badge badge-blue">TypeScript</span>
+    <span class="badge badge-green">Express 5</span>
+    <span class="badge badge-green">PostgreSQL</span>
+    <span class="badge badge-amber">PWA Offline</span>
+    <span class="badge badge-slate">RTL Arabic</span>
+    <span class="badge badge-slate">Dark Mode</span>
+    <span class="badge badge-slate">Thermal Print</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════ FEATURES ════════════════════════════ -->
+<div class="container">
+  <section>
+    <h2><span class="icon">✨</span> المميزات الرئيسية</h2>
+    <p class="section-sub">منظومة متكاملة مصممة للعمل اليومي في الميدان</p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h3>نظام صلاحيات ثلاثي (RBAC)</h3>
+        <p>مالك: لوحة تحليلات كاملة وإدارة المستخدمين. مدير: مهام إدارية. عامل: إدخال بيانات وطباعة فقط.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>تطبيق PWA — يعمل بلا إنترنت</h3>
+        <p>Service Worker مع استراتيجية NetworkFirst للـ API وCacheFirst للأصول الثابتة. يحفظ البيانات محلياً ويزامن تلقائياً.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🖨️</div>
+        <h3>طباعة إيصالات حرارية</h3>
+        <p>مكوّن مُحسَّن لطابعات 58mm/80mm Bluetooth — أبيض وأسود، مع رمز QR لرقم الفاتورة.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>لوحة تحليلات مالية</h3>
+        <p>إجمالي الإيرادات والمصروفات والربح الصافي (الإيراد − المصروفات)، مرشَّح حسب الشهر والمولدة.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>توليد فواتير جماعي</h3>
+        <p>زر واحد ينشئ فواتير شهر كامل لجميع المشتركين النشطين مع نقل الديون السابقة تلقائياً.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌙</div>
+        <h3>وضع ليلي كامل</h3>
+        <p>Dark Mode مُخزَّن في localStorage — مثالي لجولات الجباية الليلية على الشاشات المضيئة.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h3>بحث فوري للمشتركين</h3>
+        <p>بحث بـ Debounce في اسم المشترك أو صاحب القاطع — يجد النتائج أثناء الكتابة.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <h3>تنسيق العملة العراقية</h3>
+        <p>جميع المبالغ بصيغة <code>150,000 د.ع</code> باستخدام <code>Intl.NumberFormat('ar-IQ')</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ ROLES ════════ -->
+  <section>
+    <h2><span class="icon">👥</span> نظام الصلاحيات (RBAC)</h2>
+    <p class="section-sub">ثلاثة أدوار تتحكم بما يمكن لكل مستخدم رؤيته وفعله</p>
+    <table>
+      <thead>
+        <tr>
+          <th>الصلاحية</th>
+          <th>مالك (Owner)</th>
+          <th>مدير (Admin)</th>
+          <th>عامل (Worker)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>لوحة الإيرادات والأرباح</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td></tr>
+        <tr><td>التاريخ المالي الشهري</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td></tr>
+        <tr><td>إدارة المستخدمين</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td></tr>
+        <tr><td>إدارة المولدات</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td></tr>
+        <tr><td>توليد فواتير جماعي</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td></tr>
+        <tr><td>إضافة مصروفات</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td></tr>
+        <tr><td>إضافة مشتركين</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td></tr>
+        <tr><td>إدخال دفعات (جباية)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>طباعة إيصالات</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 24px;">
+      <strong>مؤشرات حالة الفاتورة:</strong>
+      <div class="status-row">
+        <span class="status-pill s-paid"><span class="s-dot dot-green"></span>مدفوع</span>
+        <span class="status-pill s-partial"><span class="s-dot dot-amber"></span>دفع جزئي</span>
+        <span class="status-pill s-unpaid"><span class="s-dot dot-red"></span>غير مدفوع</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ TECH ════════ -->
+  <section>
+    <h2><span class="icon">🛠️</span> المكدس التقني</h2>
+    <p class="section-sub">أحدث الأدوات المستقرة في بيئة monorepo بـ pnpm</p>
+    <div class="grid-3">
+      <div class="tech-item"><span class="tech-label">Frontend</span><span class="tech-value">React 19 + Vite 7</span></div>
+      <div class="tech-item"><span class="tech-label">Styling</span><span class="tech-value">Tailwind CSS v4 + shadcn/ui</span></div>
+      <div class="tech-item"><span class="tech-label">Routing</span><span class="tech-value">wouter</span></div>
+      <div class="tech-item"><span class="tech-label">State/Cache</span><span class="tech-value">TanStack React Query v5</span></div>
+      <div class="tech-item"><span class="tech-label">Animations</span><span class="tech-value">Framer Motion</span></div>
+      <div class="tech-item"><span class="tech-label">Charts</span><span class="tech-value">Recharts</span></div>
+      <div class="tech-item"><span class="tech-label">PWA</span><span class="tech-value">vite-plugin-pwa + Workbox</span></div>
+      <div class="tech-item"><span class="tech-label">Backend</span><span class="tech-value">Express 5 + TypeScript</span></div>
+      <div class="tech-item"><span class="tech-label">Database</span><span class="tech-value">PostgreSQL + Drizzle ORM</span></div>
+      <div class="tech-item"><span class="tech-label">Validation</span><span class="tech-value">Zod v4 + drizzle-zod</span></div>
+      <div class="tech-item"><span class="tech-label">Auth</span><span class="tech-value">express-session + bcryptjs</span></div>
+      <div class="tech-item"><span class="tech-label">Codegen</span><span class="tech-value">Orval (OpenAPI → hooks)</span></div>
+      <div class="tech-item"><span class="tech-label">Icons</span><span class="tech-value">lucide-react</span></div>
+      <div class="tech-item"><span class="tech-label">Font</span><span class="tech-value">Noto Sans Arabic (Google)</span></div>
+      <div class="tech-item"><span class="tech-label">Monorepo</span><span class="tech-value">pnpm workspaces</span></div>
+    </div>
+  </section>
+
+  <!-- ════════ DB SCHEMA ════════ -->
+  <section>
+    <h2><span class="icon">🗄️</span> هيكل قاعدة البيانات</h2>
+    <p class="section-sub">خمسة جداول مترابطة تغطي كل احتياجات الإدارة</p>
+
+    <p class="schema-title">👤 جدول المستخدمين — <code>users</code></p>
+    <table class="schema-table">
+      <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>id</td><td class="col-type">serial PK</td><td class="col-desc">معرف فريد</td></tr>
+        <tr><td>name</td><td class="col-type">text</td><td class="col-desc">الاسم الكامل</td></tr>
+        <tr><td>username</td><td class="col-type">text unique</td><td class="col-desc">اسم الدخول</td></tr>
+        <tr><td>password_hash</td><td class="col-type">text</td><td class="col-desc">كلمة المرور مشفرة بـ bcrypt</td></tr>
+        <tr><td>role</td><td class="col-type">enum</td><td class="col-desc">owner / admin / worker</td></tr>
+        <tr><td>assigned_generator_id</td><td class="col-type">integer</td><td class="col-desc">المولدة المخصصة للعامل</td></tr>
+      </tbody>
+    </table>
+
+    <p class="schema-title">⚡ جدول المولدات — <code>generators</code></p>
+    <table class="schema-table">
+      <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>id</td><td class="col-type">serial PK</td><td class="col-desc">معرف فريد</td></tr>
+        <tr><td>name</td><td class="col-type">text</td><td class="col-desc">اسم المولدة</td></tr>
+        <tr><td>location</td><td class="col-type">text</td><td class="col-desc">الموقع / الحي</td></tr>
+        <tr><td>price_per_ampere_iqd</td><td class="col-type">integer</td><td class="col-desc">سعر الأمبير بالدينار العراقي</td></tr>
+        <tr><td>owner_id</td><td class="col-type">integer FK</td><td class="col-desc">المالك (يرجع إلى users)</td></tr>
+      </tbody>
+    </table>
+
+    <p class="schema-title">👥 جدول المشتركين — <code>subscribers</code></p>
+    <table class="schema-table">
+      <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>id</td><td class="col-type">serial PK</td><td class="col-desc">معرف فريد</td></tr>
+        <tr><td>name</td><td class="col-type">text</td><td class="col-desc">اسم المشترك</td></tr>
+        <tr><td>breaker_owner_name</td><td class="col-type">text</td><td class="col-desc">اسم صاحب القاطع</td></tr>
+        <tr><td>phone_number</td><td class="col-type">text</td><td class="col-desc">رقم الهاتف (اختياري)</td></tr>
+        <tr><td>generator_id</td><td class="col-type">integer FK</td><td class="col-desc">المولدة</td></tr>
+        <tr><td>default_amperes</td><td class="col-type">integer</td><td class="col-desc">عدد الأمبيرات الافتراضي</td></tr>
+        <tr><td>status</td><td class="col-type">enum</td><td class="col-desc">active / paused</td></tr>
+      </tbody>
+    </table>
+
+    <p class="schema-title">🧾 جدول الفواتير — <code>invoices</code></p>
+    <table class="schema-table">
+      <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>id</td><td class="col-type">serial PK</td><td class="col-desc">معرف فريد</td></tr>
+        <tr><td>subscriber_id</td><td class="col-type">integer FK</td><td class="col-desc">المشترك</td></tr>
+        <tr><td>generator_id</td><td class="col-type">integer FK</td><td class="col-desc">المولدة</td></tr>
+        <tr><td>worker_id</td><td class="col-type">integer FK</td><td class="col-desc">العامل الذي أدخل البيانات</td></tr>
+        <tr><td>amperes</td><td class="col-type">integer</td><td class="col-desc">عدد الأمبيرات</td></tr>
+        <tr><td>previous_debt</td><td class="col-type">integer</td><td class="col-desc">الدين السابق بالدينار</td></tr>
+        <tr><td>amount_expected</td><td class="col-type">integer</td><td class="col-desc">(أمبير × سعر) + دين سابق</td></tr>
+        <tr><td>amount_received</td><td class="col-type">integer</td><td class="col-desc">المبلغ المستلم فعلاً</td></tr>
+        <tr><td>month_year</td><td class="col-type">text</td><td class="col-desc">صيغة YYYY-MM</td></tr>
+        <tr><td>status</td><td class="col-type">enum</td><td class="col-desc">paid / partial / unpaid</td></tr>
+        <tr><td>notes</td><td class="col-type">text</td><td class="col-desc">ملاحظات</td></tr>
+      </tbody>
+    </table>
+
+    <p class="schema-title">💸 جدول المصروفات — <code>expenses</code></p>
+    <table class="schema-table">
+      <thead><tr><th>العمود</th><th>النوع</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td>id</td><td class="col-type">serial PK</td><td class="col-desc">معرف فريد</td></tr>
+        <tr><td>generator_id</td><td class="col-type">integer FK</td><td class="col-desc">المولدة</td></tr>
+        <tr><td>expense_type</td><td class="col-type">text</td><td class="col-desc">نوع المصروف (وقود، صيانة…)</td></tr>
+        <tr><td>amount</td><td class="col-type">integer</td><td class="col-desc">المبلغ بالدينار</td></tr>
+        <tr><td>date</td><td class="col-type">date</td><td class="col-desc">تاريخ المصروف</td></tr>
+        <tr><td>notes</td><td class="col-type">text</td><td class="col-desc">ملاحظات</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ════════ API ════════ -->
+  <section>
+    <h2><span class="icon">🔌</span> نقاط API الرئيسية</h2>
+    <p class="section-sub">RESTful API كاملة — كل المسارات مبنية من OpenAPI spec + Orval codegen</p>
+    <div class="endpoint-list">
+      <div class="endpoint"><span class="method POST">POST</span><span class="endpoint-path">/api/auth/login</span><span class="endpoint-desc">تسجيل الدخول</span></div>
+      <div class="endpoint"><span class="method POST">POST</span><span class="endpoint-path">/api/auth/logout</span><span class="endpoint-desc">تسجيل الخروج</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/auth/me</span><span class="endpoint-desc">المستخدم الحالي</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/generators</span><span class="endpoint-desc">قائمة المولدات</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/subscribers?search=&generatorId=</span><span class="endpoint-desc">بحث المشتركين</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/invoices?monthYear=&status=</span><span class="endpoint-desc">فلترة الفواتير</span></div>
+      <div class="endpoint"><span class="method POST">POST</span><span class="endpoint-path">/api/invoices/bulk-generate</span><span class="endpoint-desc">توليد فواتير جماعي</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/dashboard/summary</span><span class="endpoint-desc">ملخص لوحة القيادة</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/dashboard/financial-history</span><span class="endpoint-desc">التاريخ المالي الشهري</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/dashboard/recent-transactions</span><span class="endpoint-desc">آخر المعاملات</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/expenses</span><span class="endpoint-desc">قائمة المصروفات</span></div>
+      <div class="endpoint"><span class="method GET">GET</span><span class="endpoint-path">/api/users</span><span class="endpoint-desc">إدارة المستخدمين (مالك فقط)</span></div>
+    </div>
+  </section>
+
+  <!-- ════════ SETUP ════════ -->
+  <section>
+    <h2><span class="icon">🚀</span> تشغيل المشروع</h2>
+    <p class="section-sub">خطوات إعداد بيئة التطوير المحلية</p>
+
+    <div class="cred-box">
+      <h3>بيانات الدخول التجريبية</h3>
+      <div class="cred-row">
+        <div class="cred-item">
+          <span class="key">المالك:</span><span class="val">admin</span>
+          <span class="key">/ كلمة المرور:</span><span class="val">admin123</span>
+        </div>
+        <div class="cred-item">
+          <span class="key">العامل:</span><span class="val">worker1</span>
+          <span class="key">/ كلمة المرور:</span><span class="val">worker123</span>
+        </div>
+      </div>
+    </div>
+
+    <pre><span class="comment"># 1. استنساخ المستودع</span>
+git clone https://github.com/your-username/mawlidati.git
+cd mawlidati
+
+<span class="comment"># 2. تثبيت الحزم</span>
+pnpm install
+
+<span class="comment"># 3. إعداد متغيرات البيئة</span>
+<span class="keyword">export</span> <span class="string">DATABASE_URL</span>=postgresql://user:pass@localhost:5432/mawlidati
+<span class="keyword">export</span> <span class="string">SESSION_SECRET</span>=your-secret-key-here
+
+<span class="comment"># 4. رفع هيكل قاعدة البيانات</span>
+pnpm --filter @workspace/db run push
+
+<span class="comment"># 5. تشغيل الخادم</span>
+pnpm --filter @workspace/api-server run dev
+
+<span class="comment"># 6. تشغيل الواجهة (في terminal آخر)</span>
+pnpm --filter @workspace/mawlidati run dev</pre>
+
+    <pre><span class="comment"># إعادة توليد الـ API hooks من OpenAPI spec</span>
+pnpm --filter @workspace/api-spec run codegen
+
+<span class="comment"># فحص TypeScript لكل المشروع</span>
+pnpm run typecheck</pre>
+  </section>
+
+  <!-- ════════ STRUCTURE ════════ -->
+  <section>
+    <h2><span class="icon">📁</span> هيكل المشروع</h2>
+    <pre>mawlidati/
+├── artifacts/
+│   ├── api-server/          <span class="comment"># Express 5 REST API</span>
+│   │   └── src/
+│   │       ├── routes/      <span class="comment"># auth, users, generators, subscribers, invoices, expenses, dashboard</span>
+│   │       └── app.ts       <span class="comment"># Express app + session middleware</span>
+│   └── mawlidati/           <span class="comment"># React PWA (Arabic RTL)</span>
+│       └── src/
+│           ├── pages/       <span class="comment"># login, dashboard, subscribers, invoices, financial-history, ...</span>
+│           ├── components/  <span class="comment"># Layout, ThermalReceipt, ThemeToggle, shadcn/ui</span>
+│           ├── contexts/    <span class="comment"># AuthContext (RBAC helpers)</span>
+│           └── lib/         <span class="comment"># format.ts (IQD currency), utils.ts</span>
+└── lib/
+    ├── api-spec/            <span class="comment"># OpenAPI YAML + Orval config</span>
+    ├── api-client-react/    <span class="comment"># Generated React Query hooks</span>
+    ├── api-zod/             <span class="comment"># Generated Zod validation schemas</span>
+    └── db/                  <span class="comment"># Drizzle ORM schema + migrations</span></pre>
+  </section>
+
+</div>
+
+<!-- ════════════════════════════ FOOTER ════════════════════════════ -->
+<footer>
+  <p>بُني بـ <strong>React</strong> + <strong>Express</strong> + <strong>PostgreSQL</strong> — مشروع مفتوح المصدر لخدمة أهالي الأحياء العراقية</p>
+  <p style="margin-top:8px; font-size:0.8rem;">مولدتي &copy; 2025 — جميع الحقوق محفوظة</p>
+</footer>
+
+</body>
+</html>
