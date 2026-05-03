@@ -3,20 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API specification for مولدتي - Iraqi Generator Management System
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: generators
+    description: Generator management
+  - name: subscribers
+    description: Subscriber management
+  - name: invoices
+    description: Invoice management
+  - name: expenses
+    description: Expense management
+  - name: dashboard
+    description: Dashboard analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,623 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (owner only)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a new user (owner only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: User deleted
+
+  /generators:
+    get:
+      operationId: listGenerators
+      tags: [generators]
+      summary: List generators
+      responses:
+        "200":
+          description: List of generators
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Generator"
+    post:
+      operationId: createGenerator
+      tags: [generators]
+      summary: Create a new generator (owner only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGeneratorBody"
+      responses:
+        "201":
+          description: Generator created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Generator"
+
+  /generators/{id}:
+    get:
+      operationId: getGenerator
+      tags: [generators]
+      summary: Get generator by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Generator found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Generator"
+    put:
+      operationId: updateGenerator
+      tags: [generators]
+      summary: Update generator
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGeneratorBody"
+      responses:
+        "200":
+          description: Generator updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Generator"
+    delete:
+      operationId: deleteGenerator
+      tags: [generators]
+      summary: Delete generator
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Generator deleted
+
+  /subscribers:
+    get:
+      operationId: listSubscribers
+      tags: [subscribers]
+      summary: List subscribers with optional search and filter
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by name or breaker owner name
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/SubscriberStatus"
+      responses:
+        "200":
+          description: List of subscribers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subscriber"
+    post:
+      operationId: createSubscriber
+      tags: [subscribers]
+      summary: Create a new subscriber
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriberBody"
+      responses:
+        "201":
+          description: Subscriber created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscriber"
+
+  /subscribers/{id}:
+    get:
+      operationId: getSubscriber
+      tags: [subscribers]
+      summary: Get subscriber by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Subscriber found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscriber"
+    put:
+      operationId: updateSubscriber
+      tags: [subscribers]
+      summary: Update subscriber
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSubscriberBody"
+      responses:
+        "200":
+          description: Subscriber updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscriber"
+    delete:
+      operationId: deleteSubscriber
+      tags: [subscribers]
+      summary: Delete subscriber
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Subscriber deleted
+
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List invoices with filters
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: subscriberId
+          in: query
+          schema:
+            type: integer
+        - name: workerId
+          in: query
+          schema:
+            type: integer
+        - name: monthYear
+          in: query
+          schema:
+            type: string
+          description: "Month filter e.g. 2025-01"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/InvoiceStatus"
+      responses:
+        "200":
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create/record a payment invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvoiceBody"
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /invoices/bulk-generate:
+    post:
+      operationId: bulkGenerateInvoices
+      tags: [invoices]
+      summary: Bulk generate invoices for all active subscribers for a given month
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkGenerateBody"
+      responses:
+        "200":
+          description: Bulk generation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkGenerateResult"
+
+  /invoices/{id}:
+    get:
+      operationId: getInvoice
+      tags: [invoices]
+      summary: Get invoice by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+    put:
+      operationId: updateInvoice
+      tags: [invoices]
+      summary: Update invoice (record payment)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInvoiceBody"
+      responses:
+        "200":
+          description: Invoice updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /expenses:
+    get:
+      operationId: listExpenses
+      tags: [expenses]
+      summary: List expenses with filters
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: string
+          description: "Month filter e.g. 2025-01"
+      responses:
+        "200":
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Create an expense record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExpenseBody"
+      responses:
+        "201":
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
+  /expenses/{id}:
+    put:
+      operationId: updateExpense
+      tags: [expenses]
+      summary: Update an expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExpenseBody"
+      responses:
+        "200":
+          description: Expense updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+    delete:
+      operationId: deleteExpense
+      tags: [expenses]
+      summary: Delete an expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Expense deleted
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary - totals, active subscribers, unpaid count
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: monthYear
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/financial-history:
+    get:
+      operationId: getFinancialHistory
+      tags: [dashboard]
+      summary: Get monthly financial history - revenue, expenses, net profit
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Monthly financial history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyFinancial"
+
+  /dashboard/recent-transactions:
+    get:
+      operationId: getRecentTransactions
+      tags: [dashboard]
+      summary: Get recent invoice transactions with worker info
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Recent transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionRecord"
+
+  /dashboard/invoice-status-breakdown:
+    get:
+      operationId: getInvoiceStatusBreakdown
+      tags: [dashboard]
+      summary: Get breakdown of invoices by status for a month
+      parameters:
+        - name: generatorId
+          in: query
+          schema:
+            type: integer
+        - name: monthYear
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Status breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceStatusBreakdown"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +665,525 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+
+    UserRole:
+      type: string
+      enum: [owner, admin, worker]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        username:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        assignedGeneratorId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - username
+        - role
+        - createdAt
+
+    CreateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        assignedGeneratorId:
+          type: integer
+          nullable: true
+      required:
+        - name
+        - username
+        - password
+        - role
+
+    UpdateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        assignedGeneratorId:
+          type: integer
+          nullable: true
+
+    Generator:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        location:
+          type: string
+        pricePerAmpereIqd:
+          type: integer
+          description: Price per ampere in Iraqi Dinars
+        ownerId:
+          type: integer
+        activeSubscribersCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - location
+        - pricePerAmpereIqd
+        - ownerId
+        - createdAt
+
+    CreateGeneratorBody:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        pricePerAmpereIqd:
+          type: integer
+      required:
+        - name
+        - location
+        - pricePerAmpereIqd
+
+    UpdateGeneratorBody:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        pricePerAmpereIqd:
+          type: integer
+
+    SubscriberStatus:
+      type: string
+      enum: [active, paused]
+
+    Subscriber:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        breakerOwnerName:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+        generatorId:
+          type: integer
+        defaultAmperes:
+          type: integer
+        status:
+          $ref: "#/components/schemas/SubscriberStatus"
+        currentDebt:
+          type: integer
+          description: Current outstanding debt in IQD
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - breakerOwnerName
+        - generatorId
+        - defaultAmperes
+        - status
+        - currentDebt
+        - createdAt
+
+    CreateSubscriberBody:
+      type: object
+      properties:
+        name:
+          type: string
+        breakerOwnerName:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+        generatorId:
+          type: integer
+        defaultAmperes:
+          type: integer
+        status:
+          $ref: "#/components/schemas/SubscriberStatus"
+      required:
+        - name
+        - breakerOwnerName
+        - generatorId
+        - defaultAmperes
+
+    UpdateSubscriberBody:
+      type: object
+      properties:
+        name:
+          type: string
+        breakerOwnerName:
+          type: string
+        phoneNumber:
+          type: string
+          nullable: true
+        defaultAmperes:
+          type: integer
+        status:
+          $ref: "#/components/schemas/SubscriberStatus"
+
+    InvoiceStatus:
+      type: string
+      enum: [paid, partial, unpaid]
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        subscriberId:
+          type: integer
+        generatorId:
+          type: integer
+        workerId:
+          type: integer
+          nullable: true
+        amperes:
+          type: integer
+        previousDebt:
+          type: integer
+        amountExpected:
+          type: integer
+          description: "(Amperes * Price) + Previous Debt in IQD"
+        amountReceived:
+          type: integer
+        monthYear:
+          type: string
+          description: "YYYY-MM format"
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        subscriber:
+          $ref: "#/components/schemas/Subscriber"
+          nullable: true
+        worker:
+          $ref: "#/components/schemas/User"
+          nullable: true
+      required:
+        - id
+        - subscriberId
+        - generatorId
+        - amperes
+        - previousDebt
+        - amountExpected
+        - amountReceived
+        - monthYear
+        - status
+        - createdAt
+
+    CreateInvoiceBody:
+      type: object
+      properties:
+        subscriberId:
+          type: integer
+        generatorId:
+          type: integer
+        amperes:
+          type: integer
+        previousDebt:
+          type: integer
+          default: 0
+        amountReceived:
+          type: integer
+        monthYear:
+          type: string
+        notes:
+          type: string
+          nullable: true
+      required:
+        - subscriberId
+        - generatorId
+        - amperes
+        - amountReceived
+        - monthYear
+
+    UpdateInvoiceBody:
+      type: object
+      properties:
+        amperes:
+          type: integer
+        amountReceived:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+
+    BulkGenerateBody:
+      type: object
+      properties:
+        generatorId:
+          type: integer
+        monthYear:
+          type: string
+          description: "YYYY-MM format"
+      required:
+        - generatorId
+        - monthYear
+
+    BulkGenerateResult:
+      type: object
+      properties:
+        generated:
+          type: integer
+        skipped:
+          type: integer
+        monthYear:
+          type: string
+        invoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+      required:
+        - generated
+        - skipped
+        - monthYear
+        - invoices
+
+    Expense:
+      type: object
+      properties:
+        id:
+          type: integer
+        generatorId:
+          type: integer
+        expenseType:
+          type: string
+        amount:
+          type: integer
+          description: Amount in IQD
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - generatorId
+        - expenseType
+        - amount
+        - date
+        - createdAt
+
+    CreateExpenseBody:
+      type: object
+      properties:
+        generatorId:
+          type: integer
+        expenseType:
+          type: string
+        amount:
+          type: integer
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+      required:
+        - generatorId
+        - expenseType
+        - amount
+        - date
+
+    UpdateExpenseBody:
+      type: object
+      properties:
+        expenseType:
+          type: string
+        amount:
+          type: integer
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalExpectedRevenue:
+          type: integer
+        totalCollected:
+          type: integer
+        totalOutstanding:
+          type: integer
+        totalExpenses:
+          type: integer
+        netProfit:
+          type: integer
+        activeSubscribersCount:
+          type: integer
+        paidCount:
+          type: integer
+        partialCount:
+          type: integer
+        unpaidCount:
+          type: integer
+        collectionRate:
+          type: number
+          format: double
+      required:
+        - totalExpectedRevenue
+        - totalCollected
+        - totalOutstanding
+        - totalExpenses
+        - netProfit
+        - activeSubscribersCount
+        - paidCount
+        - partialCount
+        - unpaidCount
+        - collectionRate
+
+    MonthlyFinancial:
+      type: object
+      properties:
+        monthYear:
+          type: string
+        revenue:
+          type: integer
+        expenses:
+          type: integer
+        netProfit:
+          type: integer
+        invoiceCount:
+          type: integer
+        paidCount:
+          type: integer
+      required:
+        - monthYear
+        - revenue
+        - expenses
+        - netProfit
+        - invoiceCount
+        - paidCount
+
+    TransactionRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        subscriberName:
+          type: string
+        breakerOwnerName:
+          type: string
+        generatorName:
+          type: string
+        workerName:
+          type: string
+          nullable: true
+        amountExpected:
+          type: integer
+        amountReceived:
+          type: integer
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        monthYear:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - subscriberName
+        - breakerOwnerName
+        - generatorName
+        - amountExpected
+        - amountReceived
+        - status
+        - monthYear
+        - createdAt
+
+    InvoiceStatusBreakdown:
+      type: object
+      properties:
+        paid:
+          type: integer
+        partial:
+          type: integer
+        unpaid:
+          type: integer
+        totalAmount:
+          type: integer
+        collectedAmount:
+          type: integer
+      required:
+        - paid
+        - partial
+        - unpaid
+        - totalAmount
+        - collectedAmount

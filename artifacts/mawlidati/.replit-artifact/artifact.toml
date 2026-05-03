@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "مولدتي - نظام إدارة المولدات"
+version = "1.0.0"
+id = "artifacts/mawlidati"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24488
+
+[services.development]
+run = "pnpm --filter @workspace/mawlidati run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mawlidati", "run", "build" ]
+publicDir = "artifacts/mawlidati/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24488"
+BASE_PATH = "/"
